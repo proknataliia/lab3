@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="uk">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Security Demo</title>
+	<link rel="stylesheet" href="/security/styles.css">
+</head>
+<body>
+	<main class="page">
+		<header class="top">
+			<div>
+				<p>Третя лабораторна</p>
+				<h1>API Abuse та CORS Misconfiguration</h1>
+			</div>
+			<button id="resetAbuseBtn" type="button">Скинути лічильники</button>
+		</header>
+
+		<section class="grid">
+			<article class="card">
+				<h2>4. API Abuse</h2>
+				<p>Вразливий API виконує дорогу операцію без обмежень. Захищений API має ліміт одночасних операцій і лічильник запитів.</p>
+
+				<label for="abuseCount">Кількість запитів</label>
+				<input id="abuseCount" type="number" min="1" max="60" value="15">
+				<output id="abuseError"></output>
+
+				<div class="actions">
+					<button id="abuseVulnerableBtn" type="button">Атака на вразливий API</button>
+					<button id="abuseProtectedBtn" type="button">Атака на захищений API</button>
+				</div>
+
+				<table>
+					<tbody>
+						<tr>
+							<th>Вразливий</th>
+							<td><code>GET /api/security/abuse/vulnerable</code></td>
+						</tr>
+						<tr>
+							<th>Захищений</th>
+							<td><code>GET /api/security/abuse/protected</code></td>
+						</tr>
+					</tbody>
+				</table>
+			</article>
+
+			<article class="card">
+				<h2>5. CORS Misconfiguration</h2>
+				<p>Вразливий API дозволяє читання з будь-якого origin. Захищений API дозволяє читання тільки довіреному frontend origin.</p>
+
+				<div class="actions">
+					<button id="corsVulnerableBtn" type="button">Attacker читає вразливий профіль</button>
+					<button id="corsProtectedBtn" type="button">Attacker читає захищений профіль</button>
+				</div>
+
+				<table>
+					<tbody>
+						<tr>
+							<th>Вразливий</th>
+							<td><code>GET /api/security/cors/vulnerable/profile</code></td>
+						</tr>
+						<tr>
+							<th>Захищений</th>
+							<td><code>GET /api/security/cors/protected/profile</code></td>
+						</tr>
+					</tbody>
+				</table>
+			</article>
+		</section>
+
+		<section class="card">
+			<h2>Результат</h2>
+			<div id="summary" class="summary">Оберіть демонстрацію.</div>
+			<pre id="log"></pre>
+		</section>
+	</main>
+
+	<script src="/security/app.js"></script>
+</body>
+</html>
