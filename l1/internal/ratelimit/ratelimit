@@ -1,0 +1,33 @@
+package ratelimit
+
+import (
+	"sync"
+	"time"
+)
+
+type RateLimiter struct {
+	mu       sync.Mutex
+	lastReq  map[string]time.Time
+	interval time.Duration
+}
+
+func New(seconds int64) *RateLimiter {
+	return &RateLimiter{
+		lastReq:  make(map[string]time.Time),
+		interval: time.Duration(seconds) * time.Second,
+	}
+}
+
+func (rl *RateLimiter) Allow(key string) bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
+	now := time.Now()
+	last, exists := rl.lastReq[key]
+	if exists && now.Sub(last) < rl.interval {
+		return false
+	}
+
+	rl.lastReq[key] = now
+	return true
+}
