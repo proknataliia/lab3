@@ -1,0 +1,47 @@
+package config
+
+import (
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	IPInfoAPIKey string
+	Port         string
+	RateLimitSec int64
+}
+
+func Load() Config {
+	_ = godotenv.Load()
+
+	return Config{
+		IPInfoAPIKey: os.Getenv("IPINFO_API_KEY"),
+		Port:         getEnv("PORT", "8080"),
+		RateLimitSec: getEnvInt64("RATE_LIMIT_SEC", 5),
+	}
+}
+
+func getEnv(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	return value
+}
+
+func getEnvInt64(key string, fallback int64) int64 {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.ParseInt(value, 10, 64)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+
+	return parsed
+}
