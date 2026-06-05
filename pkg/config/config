@@ -1,0 +1,26 @@
+package config
+
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	BotToken    string
+	IPInfoToken string
+}
+
+func Load() (*Config, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := &Config{
+		BotToken:    os.Getenv("BOT_TOKEN"),
+		IPInfoToken: os.Getenv("IPINFO_TOKEN"),
+	}
+
+	return cfg, nil
+}
