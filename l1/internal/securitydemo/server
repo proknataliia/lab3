@@ -1,0 +1,113 @@
+package securitydemo
+
+import (
+	"net/http"
+	"sync"
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
+
+type Server struct {
+	abuseSlots chan struct{}
+	mu         sync.Mutex
+	requests   map[string]int
+}
+
+func NewServer() *Server {
+	return &Server{
+		abuseSlots: make(chan struct{}, 5),
+		requests:   make(map[string]int),
+	}
+}
+
+func (s *Server) RegisterRoutes(r *gin.Engine) {
+	api := r.Group("/api/security")
+
+	api.GET("/abuse/vulnerable", s.apiAbuseVulnerable)
+	api.GET("/abuse/protected", s.apiAbuseProtected)
+	api.POST("/abuse/reset", s.resetAbuse)
+
+	api.GET("/cors/vulnerable/profile", s.corsVulnerableProfile)
+	api.GET("/cors/protected/profile", s.corsProtectedProfile)
+}
+
+func (s *Server) apiAbuseVulnerable(c *gin.Context) {
+	time.Sleep(500 * time.Millisecond)
+
+	c.JSON(http.StatusOK, gin.H{
+		"endpoint": "api-abuse vulnerable",
+		"message":  "Expensive API operation completed without protection",
+	})
+}
+
+func (s *Server) apiAbuseProtected(c *gin.Context) {
+	ip := c.ClientIP()
+
+	s.mu.Lock()
+	s.requests[ip]++
+	count := s.requests[ip]
+	s.mu.Unlock()
+
+	if count > 20 {
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"endpoint": "api-abuse protected",
+			"error":    "Request limit exceeded",
+			"count":    count,
+		})
+		return
+	}
+
+	select {
+	case s.abuseSlots <- struct{}{}:
+		defer func() { <-s.abuseSlots }()
+	default:
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"endpoint": "api-abuse protected",
+			"error":    "Too many concurrent expensive operations",
+			"count":    count,
+		})
+		return
+	}
+
+	time.Sleep(500 * time.Millisecond)
+
+	c.JSON(http.StatusOK, gin.H{
+		"endpoint": "api-abuse protected",
+		"message":  "Expensive API operation completed with limits",
+		"count":    count,
+	})
+}
+
+func (s *Server) resetAbuse(c *gin.Context) {
+	s.mu.Lock()
+	s.requests = make(map[string]int)
+	s.mu.Unlock()
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "API abuse counters reset",
+	})
+}
+
+func (s *Server) corsVulnerableProfile(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+
+	c.JSON(http.StatusOK, gin.H{
+		"email": "student@example.com",
+		"role":  "user",
+		"note":  "Readable from any origin because CORS is open",
+	})
+}
+
+func (s *Server) corsProtectedProfile(c *gin.Context) {
+	origin := c.GetHeader("Origin")
+	if origin == "http://localhost:8080" {
+		c.Header("Access-Control-Allow-Origin", origin)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"email": "student@example.com",
+		"role":  "user",
+		"note":  "Readable only from trusted frontend origin",
+	})
+}
