@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="uk">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>IPInfo Client</title>
+	<link rel="stylesheet" href="/client/styles.css">
+</head>
+<body>
+	<main class="page">
+		<header class="header">
+			<div>
+				<p class="eyebrow">HTTP клієнт</p>
+				<h1>IPInfo Server</h1>
+			</div>
+			<button id="helpBtn" type="button">GET /</button>
+		</header>
+
+		<section class="grid">
+			<form class="panel form-panel" id="getIpForm" novalidate>
+				<h2>GET /api/ip/:ip</h2>
+				<label for="getIp">IP адреса</label>
+				<input id="getIp" name="ip" type="text" placeholder="8.8.8.8" required>
+				<output id="getIpError"></output>
+				<button type="submit">Перевірити через GET</button>
+			</form>
+
+			<form class="panel form-panel" id="postIpForm" novalidate>
+				<h2>POST /api/ip</h2>
+				<label for="postIp">IP адреса</label>
+				<input id="postIp" name="ip" type="text" placeholder="2001:4860:4860::8888" required>
+				<output id="postIpError"></output>
+				<button type="submit">Перевірити через POST</button>
+			</form>
+		</section>
+
+		<section class="panel toolbar">
+			<button id="healthBtn" type="button">GET /health</button>
+			<button id="clearBtn" type="button">Очистити результат</button>
+		</section>
+
+		<section class="panel result">
+			<h2>Результат</h2>
+			<div id="status" class="status">Оберіть ендпоінт для перевірки.</div>
+
+			<dl id="ipData" class="details" hidden>
+				<div>
+					<dt>IP</dt>
+					<dd id="resultIp">-</dd>
+				</div>
+				<div>
+					<dt>Країна</dt>
+					<dd id="resultCountry">-</dd>
+				</div>
+				<div>
+					<dt>Регіон</dt>
+					<dd id="resultRegion">-</dd>
+				</div>
+				<div>
+					<dt>Місто</dt>
+					<dd id="resultCity">-</dd>
+				</div>
+				<div>
+					<dt>Провайдер</dt>
+					<dd id="resultOrg">-</dd>
+				</div>
+				<div>
+					<dt>Hostname</dt>
+					<dd id="resultHostname">-</dd>
+				</div>
+			</dl>
+
+			<pre id="rawOutput"></pre>
+		</section>
+	</main>
+
+	<script src="/client/app.js"></script>
+</body>
+</html>
